@@ -2,6 +2,7 @@
 
 # Used for `definitions.py` to define a variable to Project Root
 import os
+# for downloading file from URL
 import urllib.request
 from PyPDF2 import PdfFileReader
 import PyPDF2
@@ -35,8 +36,9 @@ print('PDF Grab N Scan is now beginning file download...')
 print('=' *80)
 print('Downloading file is disabled, using local Downloaded.File.pdf')
 print('='*80)
+
 # Note, urllib docs state urlretrieve will possibly be deprecated...someday.
-##DISABLED TEMPORARILY##urllib.request.urlretrieve(fileURL, downloadedFile)
+urllib.request.urlretrieve(fileURL, downloadedFile)
 
 with open(downloadedFile, mode='rb') as f:
 	reader = PyPDF2.PdfFileReader(f, strict=False)
@@ -48,7 +50,6 @@ with open(downloadedFile, mode='rb') as f:
 	if searchMatch == False:
 		print("No matches for " \
 			  + searchWord + " in " + downloadedFile + ", exiting program.")
-
 
 #### Email Section
 
@@ -66,6 +67,7 @@ if searchMatch == True:
 		message['From'] = email_sender_account
 		message['To'] = recipient
 		message['Subject'] = email_subject
+		message['Content-Type'] = 'text/html'
 		message.attach(MIMEText(email_body, 'html'))
 		text = message.as_string()
 		server.sendmail(email_sender_account, recipient, text)
@@ -73,5 +75,4 @@ if searchMatch == True:
 	#All emails sent, log out.
 	server.quit()
 
-
-# TODO file cleanup after process completed
+# TODO add file cleanup after file searched.

@@ -4,15 +4,20 @@ from datetime import date
 
 # Config file with sensitive data
 
-# should be stripping this text to make search a bit more broad
+# should be stripping this text to make search a bit more broad, but until then
+# capitalization matters.
 searchWord = ""
 
-# Place custom URL here, currently this script isn't adaptable, so static only!
-fileURL = ""
+# Place custom URLs here, currently this script isn't adaptable, so static only!
+urlList = ["https://www.stlouiscountymn.gov/Portals/0/rpts/SLCJ_Jail_Roster.PDF",
+			"https://www.stlouiscountymn.gov/Portals/0/rpts/STLSO_M_Warrant_List.PDF",
+			"https://www.stlouiscountymn.gov/Portals/0/rpts/STLSO_F_Warrant_List.PDF"
+		   ]
 
 # Email Account Info
 email_sender_account = ""
 email_sender_username = ""
+
 # Plaintext very BAD, don't do it!
 email_sender_password = ""
 email_smtp_server = ""

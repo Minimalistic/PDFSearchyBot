@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-
-import os # Used for `definitions.py` to define a variable to Project Root
+# Used for `definitions.py` to define a variable to Project Root
+import os
 import urllib.request
 from PyPDF2 import PdfFileReader
 import PyPDF2
@@ -31,39 +31,47 @@ downloadedFile = 'DownloadedFile.pdf'
 
 search_word_count = 0
 
-print('PDF Grab N Scan is now beginning file download to specified folder...')
+print('PDF Grab N Scan is now beginning file download...')
+print('=' *80)
+print('Downloading file is disabled, using local Downloaded.File.pdf')
+print('='*80)
+# Note, urllib docs state urlretrieve will possibly be deprecated...someday.
+##DISABLED TEMPORARILY##urllib.request.urlretrieve(fileURL, downloadedFile)
 
 with open(downloadedFile, mode='rb') as f:
 	reader = PyPDF2.PdfFileReader(f, strict=False)
 	for page in reader.pages:
 		extractedText = page.extractText()
-		if (extractedText.find(searchWord) != -1):
-			print ("Defined word has likely been found in the downloaded PDF.")
+		if (extractedText.find(searchWord) >= 0):
+			print ("Possible match for " + searchWord)
 			searchMatch = True
-			print(searchWord)
-			
+	if searchMatch == False:
+		print("No matches for " \
+			  + searchWord + " in " + downloadedFile + ", exiting program.")
+
+
 #### Email Section
 
-#login to email server
+# Login to email server
+if searchMatch == True:
+	server = smtplib.SMTP(email_smtp_server, email_smtp_port)
+	server.ehlo()
+	server.starttls()
+	server.login(email_sender_username, email_sender_password)
 
-server = smtplib.SMTP(email_smtp_server, email_smtp_port)
-server.ehlo()
-server.starttls()
-server.login(email_sender_username, email_sender_password)
+	# For loop, sending emails to all recipients
+	for recipient in email_recipients:
+		print(f"Sending email to {recipient}")
+		message = MIMEMultipart('alternative')
+		message['From'] = email_sender_account
+		message['To'] = recipient
+		message['Subject'] = email_subject
+		message.attach(MIMEText(email_body, 'html'))
+		text = message.as_string()
+		server.sendmail(email_sender_account, recipient, text)
 
-#For loop, sending emails to all recipients
-for recipient in email_recipients:
-	print(f"Sending email to {recipient}")
-	message = MIMEMultipart('alternative')
-	message['From'] = email_sender_account
-	message['To'] = recipient
-	message['Subject'] = email_subject
-	message.attach(MIMEText(email_body, 'html'))
-	text = message.as_string()
-	server.sendmail(email_sender_account, recipient, text)
-
-#All emails sent, log out.
-server.quit()
+	#All emails sent, log out.
+	server.quit()
 
 
 # TODO file cleanup after process completed

@@ -1,4 +1,4 @@
-# PDF Search Bot
+# PDFSearchyBot
 
 ## Description
 A simple script that can be customized for use - Assign a URL for a PDF to be downloaded and scanned for certain keywords.  Typically the usage is that the PDF is changing occasionally and you're wanting to be alerted to any pertinent updates to its contents.

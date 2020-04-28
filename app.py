@@ -33,9 +33,10 @@ downloadedFile = 'DownloadedFile.pdf'
 search_word_count = 0
 
 print('PDF Grab N Scan is now beginning file download...')
-print('=' *80)
-print('Downloading file is disabled, using local Downloaded.File.pdf')
-print('='*80)
+
+# print('=' *80)
+# print('Downloading file is disabled, using local Downloaded.File.pdf')
+# print('='*80)
 
 # Note, urllib docs state urlretrieve will possibly be deprecated...someday.
 urllib.request.urlretrieve(fileURL, downloadedFile)

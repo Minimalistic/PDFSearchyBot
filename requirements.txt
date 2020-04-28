@@ -1,0 +1,16 @@
+appdirs==1.4.3
+astroid==2.3.3
+colorama==0.4.3
+colorzero==1.1
+distlib==0.3.0
+filelock==3.0.12
+gpiozero==1.5.1
+isort==4.3.21
+lazy-object-proxy==1.4.3
+mccabe==0.6.1
+pigpio==1.46
+pylint==2.4.4
+PyPDF2==1.26.0
+six==1.14.0
+virtualenv==20.0.18
+wrapt==1.11.2

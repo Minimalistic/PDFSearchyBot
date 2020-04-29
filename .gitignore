@@ -1,4 +1,5 @@
 *.pyc
+*.pdf
 config.py
 .vscode
 DownloadedFile.pdf

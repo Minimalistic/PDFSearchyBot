@@ -20,68 +20,77 @@ from config import searchWord,				\
 				   email_sender_password,	\
 				   email_smtp_server,		\
 				   email_smtp_port,			\
-				   email_recipients,		\
-				   email_subject,			\
-				   email_body
+				   email_recipients
 
-# variable to be changed to True if a match has been found.
+# Variable is changed to True if a match has been found.
 searchMatch = False
 
 # Give the downloaded file a name
-downloadedFile = 'DownloadedFile.pdf'
+downloadedFile = ''
+
+detectedMatches = []
 
 search_word_count = 0
 
-print('PDF Grab N Scan is now beginning file download...')
+print('PDFSearchyBot is now beginning file download...')
 
-# print('=' *80)
-# print('Downloading file is disabled, using local Downloaded.File.pdf')
-# print('='*80)
-
-# Note, urllib docs state urlretrieve will possibly be deprecated...someday.
 
 # Iterate over the urlList
 for item in urlList:
-	# Until there's indicators to which url has a match, using this to prevent
-	# multiple alerts needlessly.
-	if searchMatch == False:
-		urllib.request.urlretrieve(item, downloadedFile)
-		with open(downloadedFile, mode='rb') as f:
-			reader = PyPDF2.PdfFileReader(f, strict=False)
-			for page in reader.pages:
-				extractedText = page.extractText()
-				if (extractedText.find(searchWord) >= 0):
-					print ("Possible match for " + searchWord)
-					searchMatch = True
-			if searchMatch == False:
-				print("No matches for " \
-					+ searchWord + " in " + downloadedFile)
 
-		#### Email Section
+	downloadedFile = os.path.basename(item)
+	# Note, urllib docs state urlretrieve will possibly be deprecated...someday.
+	urllib.request.urlretrieve(item, downloadedFile)
+	
+	with open(downloadedFile, mode='rb') as f:
+		reader = PyPDF2.PdfFileReader(f, strict=False)
+		for page in reader.pages:
+			extractedText = page.extractText()
+			if (extractedText.find(searchWord) >= 0):
+				print ("Possible match for " + searchWord)
+				searchMatch = True
+		if searchMatch == False:
+			print("No matches for " \
+				+ searchWord + " in " + downloadedFile)
 
-		# Login to email server
-		if searchMatch == True:
-			server = smtplib.SMTP(email_smtp_server, email_smtp_port)
-			server.ehlo()
-			server.starttls()
-			server.login(email_sender_username, email_sender_password)
+	#### Email Section
 
-			# For loop, sending emails to all recipients
-			for recipient in email_recipients:
-				print(f"Sending email to {recipient}")
-				message = MIMEMultipart('alternative')
-				message['From'] = email_sender_account
-				message['To'] = recipient
-				message['Subject'] = email_subject
-				message['Content-Type'] = 'text/html'
-				message.attach(MIMEText(email_body, 'html'))
-				text = message.as_string()
-				server.sendmail(email_sender_account, recipient, text)
+	# Login to email server
 
-			#All emails sent, log out.
-			server.quit()
-	else:
-		print("Match found, aborting scans of other URLS in list")
-		print("Exiting program.")
+	# Store the found matches so email body can indicate where they are.
+	detectedMatches.append(downloadedFile)
+	server = smtplib.SMTP(email_smtp_server, email_smtp_port)
+	server.ehlo()
+	server.starttls()
+	server.login(email_sender_username, email_sender_password)
+
+	# For loop, sending emails to all recipients
+	for recipient in email_recipients:
+		print(f"Sending email to {recipient}")
+		message = MIMEMultipart('alternative')
+		message['From'] = email_sender_account
+		message['To'] = recipient
+		message['Subject'] = "PDFSearchyBot found matches"
+
+		# This looks rather horrific
+		email_body = f"""
+This is an automated message on behalf of Jason Marsh from PDFSearchyBot.<br>
+<br>
+Every 12 hours, PDFSearchyBot downloads the St.Louis County Jail Roster and it \
+runs a search within the downloaded PDF file, if it finds a match, \
+it then sends out this email alert to addresses that Jason has pre-selected.\
+<br>
+<br>
+*Alert* PDFSearchyBot has detected a match! <br><br>
+Here are the links to the PDF files where there were matches: <br>
+<br>
+""" + "<br>".join(str(match) for match in detectedMatches)
+		message['Content-Type'] = 'text/html'
+		message.attach(MIMEText(email_body, 'html'))
+		text = message.as_string()
+		server.sendmail(email_sender_account, recipient, text)
+
+	#All emails sent, log out.
+	server.quit()
 
 # TODO add file cleanup after file searched.

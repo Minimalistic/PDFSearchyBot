@@ -46,7 +46,7 @@ for item in urlList:
     urllib.request.urlretrieve(item, downloadedFile)
 
     # Open downloaded file, extract all text and run a search
-    with open(downloadedFile, mode='rb') as f:
+    with open(os.path.join(sys.path[0], downloadedFile), mode='rb') as f:
         reader = PyPDF2.PdfFileReader(f, strict=False)
         for page in reader.pages:
             extractedText = page.extractText()
@@ -94,7 +94,8 @@ print("All emails have been sent, logged out.")
 # file cleanup of downloaded files
 for file in downloadedFiles:
     print("Deleting " + file)
-    os.remove(file)
+    # os.remove(file)
+    os.remove(os.path.join(sys.path[0], file))
     if file in detectedMatches:
         detectedMatches.remove(file)
 

@@ -37,9 +37,10 @@ print('PDFSearchyBot is now beginning file download...')
 # Iterate over the urlList
 for item in urlList:
     
-    downloadedFiles.append(downloadedFile)
     # Store downloaded filename for later
     downloadedFile = os.path.basename(item)
+    # Add downloaded filename to list for filesystem cleanup at end of process
+    downloadedFiles.append(downloadedFile)
     # Note, urllib docs state urlretrieve will possibly be deprecated...someday.
     # Download file(item) from url in urlList
     urllib.request.urlretrieve(item, downloadedFile)
@@ -94,7 +95,8 @@ print("All emails have been sent, logged out.")
 for file in downloadedFiles:
     print("Deleting " + file)
     os.remove(file)
-    detectedMatches.remove(file)
+    if file in detectedMatches:
+        detectedMatches.remove(file)
 
 
 print("Program complete, now exiting.")

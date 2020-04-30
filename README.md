@@ -3,7 +3,7 @@
 ## Description
 *Note - Currently, this only works with PDF files and static URLs*
 
-A simple script that can be customized for use - Add a list of URLs for scanning, scipt then downloads each file at the end of those URLsand scans for specified keyword.
+A simple script that can be customized for use - Add a list of URLs for scanning, scipt then downloads each file found at those URLs and scans for specified keyword. Finally, it emails the detected keyword matches along with links to the pertinent files.
 
 ## Setup
 

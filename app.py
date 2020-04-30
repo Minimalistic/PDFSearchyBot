@@ -24,22 +24,20 @@ from config import searchWord, \
     email_smtp_port,		   \
     email_recipients
 
-# Give the downloaded file a name
+# Give the downloaded file a name.
 downloadedFile = ''
-
-# Used for storing a single detected match
-searchMatch = ''
-
+# Track all files downloaded for later deletion.
+downloadedFiles = []
 # A list for collecting all detected matches
 detectedMatches = []
-
-search_word_count = 0
+matchedURLs = []
 
 print('PDFSearchyBot is now beginning file download...')
 
 # Iterate over the urlList
 for item in urlList:
-
+    
+    downloadedFiles.append(downloadedFile)
     # Store downloaded filename for later
     downloadedFile = os.path.basename(item)
     # Note, urllib docs state urlretrieve will possibly be deprecated...someday.
@@ -52,50 +50,52 @@ for item in urlList:
         for page in reader.pages:
             extractedText = page.extractText()
             if (extractedText.find(searchWord) >= 0):
-                print("Possible match for " + searchWord)
-                searchMatch = True
-        if searchMatch == False:
-            print("No matches for "
-                  + searchWord + " in " + downloadedFile)
+                print("Possible match for " + searchWord + " in " + downloadedFile)
+                detectedMatches.append(downloadedFile)
+                matchedURLs.append(item)
+else:
+    print("Scanning of files completed, preparing to email findings.")
 
-    # Email Section
+printableMatches = '\n'.join(detectedMatches)
 
-    # Store the found matches so email body can indicate where they are.
-    detectedMatches.append(downloadedFile)
-    # Login to email service
-    server = smtplib.SMTP(email_smtp_server, email_smtp_port)
-    server.ehlo()
-    server.starttls()
-    server.login(email_sender_username, email_sender_password)
+# Email Section
 
-    # For loop, sending emails to all recipients listed in config.py
-    for recipient in email_recipients:
-        print(f"Sending email to {recipient}")
-        message = MIMEMultipart('alternative')
-        message['From'] = email_sender_account
-        message['To'] = recipient
-        message['Subject'] = "PDFSearchyBot has detected matches"
+# Login to email service
+server = smtplib.SMTP(email_smtp_server, email_smtp_port)
+server.ehlo()
+server.starttls()
+server.login(email_sender_username, email_sender_password)
 
-        # This looks rather clunky
-        email_body = f"""
-            *Alert* PDFSearchyBot has detected a match
-            in the following files:
-            <br>
-            <br>
-            """ + "<br>".join(str(match) for match in detectedMatches)
-        message['Content-Type'] = 'text/html'
-        message.attach(MIMEText(email_body, 'html'))
-        text = message.as_string()
-        server.sendmail(email_sender_account, recipient, text)
+# For loop, sending emails to all recipients listed in config.py
+for recipient in email_recipients:
+    print(f"Sending email to {recipient}")
+    message = MIMEMultipart('alternative')
+    message['From'] = email_sender_account
+    message['To'] = recipient
+    message['Subject'] = "PDFSearchyBot has detected matches"
+    message['Content-Type'] = 'text/html'
+
+    # This looks rather clunky
+    email_body = "*Alert* PDFSearchyBot has detected a match \
+        for the search term " + searchWord + " in the following files: \
+        <br>                    \
+        <br>" +  '<br>'.join(matchedURLs)
+        
+
+    message.attach(MIMEText(email_body, 'html'))
+    text = message.as_string()
+    server.sendmail(email_sender_account, recipient, text)
 
 # All emails sent, log out.
 server.quit()
 print("All emails have been sent, logged out.")
 
 # file cleanup of downloaded files
-for file in detectedMatches:
+for file in downloadedFiles:
+    print("Deleting " + file)
     os.remove(file)
-    print(file + " deleted.")
+    detectedMatches.remove(file)
+
 
 print("Program complete, now exiting.")
 sys.exit()
